@@ -13,12 +13,12 @@ class PaymentsServices extends Services
     protected string $name = "FlexPOS";
     protected string $apiClient;
     private array $tokenDetails;
-    public function __construct(float $amount , int $quantity , string $apiClient = "https://api.paymongo.com/v1/checkout_sessions" , array $tokenDetails = ['data' => 'c2tfdGVzdF9IQUFQUnJmVlZza2VHUnBtV1luOUtCd1A6' , 'type' => 'Basic'])
+    public function __construct(float $amount , int $quantity , string $apiClient = "https://api.paymongo.com/v1/checkout_sessions" , array $tokenDetails = ['data' =>'' , 'type' => 'Basic'])
     {
         $this->amount = $amount;
         $this->quantity = $quantity;
         $this->apiClient = $apiClient;
-        $this->tokenDetails = $tokenDetails;
+        $this->tokenDetails = $tokenDetails ?:  config('app.paymongo_token');
     }
     /**
      * Http body
