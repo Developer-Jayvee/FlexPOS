@@ -8,5 +8,5 @@ use Illuminate\Http\Request;
 interface OrdersInterface
 {
     public function createOrder( Request $request);
-    public function renderPaymentGateway(Request $request);
+    public function renderPaymentGateway(float $amount , int $qty);
 }
