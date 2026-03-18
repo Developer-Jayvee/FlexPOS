@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contract\OrdersInterface;
 use App\Models\OrderItems;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ class OrdersServices extends Services implements OrdersInterface
      */
     public function __construct()
     {
-        //
+      //
     }
     /**
      * createOrder
@@ -36,42 +37,36 @@ class OrdersServices extends Services implements OrdersInterface
             if(!$orders || !$details){
                 throw new \Exception("Failed to process, Incomplete payload", 500);
             }
-            DB::transaction(function () {
+            // DB::transaction();
+                $orderModel = Orders::with(['orderItems'])->create($details);
+                $itemParams = array(
+                    'order_id' => $orderModel->id
+                );
 
-            });
-
+                self::saveOrderItems($orderModel,array_merge($orders,$itemParams));
+            // DB::commit();
 
             return $this->setResponse($response);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return $this->setResponse("",500,$th->getMessage());
         }
     }
-    /**
-     * insertOrderForm
-     *
-     * @param  mixed $details
-     * @return Bool
-     */
-    private function insertOrderForm(array $details): Bool
+
+    private function saveOrderItems(Orders $order,array $items): bool
     {
-        if(count($details) === 0){
-            return false;
+        if(!$order){
+            throw new \Exception("No order found", 500);
+        }
+        if(count($items) === 0 || !$items){
+            throw new \Exception("No items found", 500);
+        }
+        foreach ($items as $col => $value) {
+            $items['order_id'] = $order->id;
+
         }
 
-        return true;
-    }
-    /**
-     * insertOrderItems
-     *
-     * @param  mixed $items
-     * @return Bool
-     */
-    private function insertOrderItems(array $items): Bool
-    {
-        if(count($items) === 0){
-           return false;
-        }
-        OrderItems::create($items);
+
         return true;
     }
     /**
