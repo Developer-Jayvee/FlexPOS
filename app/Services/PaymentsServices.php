@@ -12,13 +12,23 @@ class PaymentsServices extends Services
     protected int $quantity;
     protected string $name = "FlexPOS";
     protected string $apiClient;
+    protected string $accept;
     private array $tokenDetails;
-    public function __construct(float $amount , int $quantity , string $apiClient = "https://api.paymongo.com/v1/checkout_sessions" , array $tokenDetails = ['data' =>'' , 'type' => 'Basic'])
+
+    public function __construct(
+        float $amount,
+        int $quantity,
+        string $apiClient = "https://api.paymongo.com/v1/checkout_sessions" ,
+        array $tokenDetails = ['token' =>'' , 'type' => 'Basic'],
+        string $accept = "application/json"
+    )
     {
         $this->amount = $amount;
         $this->quantity = $quantity;
         $this->apiClient = $apiClient;
-        $this->tokenDetails = $tokenDetails ?:  config('app.paymongo_token');
+        $this->tokenDetails['token'] = $tokenDetails['token'] ?:  config('app.paymongo_token');
+        $this->tokenDetails['type'] = $tokenDetails['type'] ?:  config('app.paymongo_token_type');
+        $this->accept = $accept;
     }
     /**
      * Http body
@@ -46,10 +56,14 @@ class PaymentsServices extends Services
             ]
         ];
     }
-
+    /**
+     * Client setup
+     *
+     * @return void
+     */
     private function setupClient()
     {
-        $client = Http::accept("application/json")
+        $client = Http::accept($this->accept)
                     ->withToken(
                         $this?->tokenDetails['data'],
                         $this->tokenDetails['type'] ?: 'Bearer'
@@ -68,7 +82,7 @@ class PaymentsServices extends Services
         try {
             $response = Cache::remember('payment-gateway',60*5,function(){
                 $response = self::setupClient();
-                return $response->json();
+                return $response?->json();
             });
 
             return $response;

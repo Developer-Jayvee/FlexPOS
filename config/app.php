@@ -122,6 +122,6 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-    'paymongo_token' => env('PAYMONGO_TOKEN','')
-
+    'paymongo_token' => env('PAYMONGO_TOKEN',''),
+    'paymongo_token_type' => env('PAYMONGO_TOKEN_TYPE','Basic'),
 ];
